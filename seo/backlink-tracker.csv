@@ -1,2 +1,14 @@
 date,directory,url,tier,status,listing_url,notes
-2026-08-13,GitHub repo,https://github.com/nice-tits/letterstudio,8,live,https://github.com/nice-tits/letterstudio,dofollow README
+2026-08-13,GitHub repo,https://github.com/nice-tits/letterstudio,8,live,https://github.com/nice-tits/letterstudio,dofollow README + homepage
+2026-08-13,GitHub profile README,https://github.com/nice-tits,8,live,https://github.com/nice-tits/nice-tits,profile link to site
+2026-08-13,GitHub gist,https://gist.github.com/nice-tits/1ae01df93fe2105bbff4732fe643b129,8,live,https://gist.github.com/nice-tits/1ae01df93fe2105bbff4732fe643b129,public gist
+2026-08-13,awesome-writing-tools,https://github.com/yowainwright/awesome-writing-tools,8,pr,https://github.com/yowainwright/awesome-writing-tools/pull/50,awaiting merge
+2026-08-13,Launching Next,https://www.launchingnext.com/submit/,1,submitted,https://www.launchingnext.com/thanks/?i=144681,free queue ~4mo
+2026-08-13,Uneed,https://www.uneed.best/submit-a-tool,1,blocked,,preview ok; Cloudflare on signup
+2026-08-13,Future Tools,https://www.futuretools.io/submit-a-tool,3,blocked,,form filled; Cloudflare
+2026-08-13,NewTools,https://newtools.site/,3,blocked,,form filled; needs sign-in
+2026-08-13,Dofollow.Tools,https://dofollow.tools/submit,3,blocked,,form filled; logo upload failed
+2026-08-13,TAAFT,https://theresanaiforthat.com/submit/,3,blocked,,login + $49
+2026-08-13,SaaSHub,https://www.saashub.com/submit,2,blocked,,needs account
+2026-08-13,IndexNow,https://api.indexnow.org/indexnow,index,live,https://letterstudio.net/7c4e9b2a18d04f6e91c35a80b47d2f1e.txt,202 accepted
+
