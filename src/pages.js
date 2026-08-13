@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { SKUS } from './skus.js';
-import { GUIDES, SITE, TAGLINE, allGuides } from './guides.js';
+import { GUIDES, SITE, TAGLINE, allGuides, allFreeGuides } from './guides.js';
 import { USE_CASES, ALTS } from './dest.js';
 import { allPosts } from './blog.js';
 import { amazonSearch, offersFor, footerOffers } from './ads.js';
@@ -257,12 +257,13 @@ export function homePage() {
   <p><img src="/logos/primary-lockup-transparent-250.png" alt="Letter Studio" width="200" height="64"></p>
   <h1>Letter Studio</h1>
   <p><strong>${escapeHtml(TAGLINE)}</strong> Finished letters from the details you type. This is <strong>not legal advice</strong>.</p>
-  <p class="fine"><a href="/guides">How each letter is customized</a> · <a href="/blog">Writeups</a> · <a href="/for/gym-members">Who it’s for</a></p>
+  <p class="fine"><a href="/guides/before-you-send">Free checklist before you send</a> · <a href="/guides">How each letter is customized</a> · <a href="/blog">Writeups</a></p>
 </header>
 ${cards}
 <p class="fine">Not legal advice. We draft. You send it yourself.</p>
 <nav>
   <a href="/guides">Guides</a> ·
+  <a href="/guides/before-you-send">Checklist</a> ·
   <a href="/blog">Blog</a> ·
   <a href="/for/gym-members">Gym</a> ·
   <a href="/for/families">Eulogy</a> ·
@@ -291,12 +292,75 @@ export function guidesIndexPage() {
     'Guides',
     `<h1>How we customize each letter</h1>
 <p>Every order is built from the fields you fill in. We do not paste a stock letter with your name at the top and call it done.</p>
+<p class="card"><strong>Free.</strong> <a href="/guides/before-you-send">Don’t send the letter until you have these facts</a> — a one-page checklist. No signup.</p>
 <ul>${items}</ul>
 <p>Also: <a href="/blog">writeups</a> · <a href="/alternatives/chatgpt">vs ChatGPT</a> · <a href="/for/gym-members">use cases</a></p>
 <nav><a href="/">Order a letter</a> · <a href="/privacy">Privacy</a></nav>`,
     {
       path: '/guides',
-      description: 'How Letter Studio customizes each letter from your details. Not legal advice.',
+      description: 'How Letter Studio customizes each letter from your details. Free send-it checklist. Not legal advice.',
+    },
+  );
+}
+
+export function freeGuidePage(guide) {
+  const sections = guide.sections
+    .map((s) => {
+      const items = s.items.map((c) => `<li>${escapeHtml(c)}</li>`).join('');
+      return `<h2>${escapeHtml(s.heading)}</h2>\n<ul>${items}</ul>`;
+    })
+    .join('\n');
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: guide.title,
+    description: guide.description,
+    step: guide.sections.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.heading,
+      text: s.items.join(' '),
+    })),
+  };
+  const faq = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'Is this legal advice?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'No. This is a checklist of facts to gather before you send a letter. Not legal advice.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Do I have to pay or sign up?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'No. The checklist is free. If you want a draft assembled from those facts, the form is on the home page. You still send the letter.',
+        },
+      },
+    ],
+  };
+  return layout(
+    guide.title,
+    `<nav class="fine"><a href="/">Home</a> · <a href="/guides">Guides</a></nav>
+<article>
+  <h1>${escapeHtml(guide.h1)}</h1>
+  <p><strong>${escapeHtml(TAGLINE)}</strong> ${escapeHtml(guide.what)}</p>
+  ${sections}
+  <h2>What this is not</h2>
+  <p>${escapeHtml(guide.not)}</p>
+  <p>No signup. If the boxes are full and you do not want to assemble the letter, <a href="/">the form is here</a>. You still send it.</p>
+</article>
+<nav><a href="/guides">All guides</a> · <a href="/privacy">Privacy</a></nav>`,
+    {
+      path: `/guides/${guide.slug}`,
+      description: guide.description,
+      ogType: 'article',
+      jsonLd: [jsonLd, faq],
     },
   );
 }
@@ -352,6 +416,7 @@ export function guidePage(guide) {
       description: guide.description,
       ogType: 'article',
       sku: guide.slug,
+      crumb: guide.h1,
       jsonLd: [jsonLd, faq],
     },
   );
@@ -390,7 +455,7 @@ ${more}
 <p><a href="${escapeHtml(page.cta)}">Write this letter</a></p>
 ${relatedList(page.related)}
 <p class="fine">Not legal advice. You send it yourself.</p>`,
-    { path: `/for/${page.slug}`, description: page.description, sku: page.sku, jsonLd: faq },
+    { path: `/for/${page.slug}`, description: page.description, sku: page.sku, crumb: page.h1, jsonLd: faq },
   );
 }
 
@@ -413,7 +478,7 @@ export function altPage(page) {
 <p>We write it. You send it. Not legal advice.</p>
 ${relatedList(page.related)}
 <p><a href="/">See letters</a></p>`,
-    { path: `/alternatives/${page.slug}`, description: page.description, jsonLd: faq },
+    { path: `/alternatives/${page.slug}`, description: page.description, crumb: page.h1, jsonLd: faq },
   );
 }
 
@@ -489,6 +554,7 @@ export function blogPostPage(post) {
       description: post.description,
       ogType: 'article',
       sku: post.sku,
+      crumb: post.h1,
       jsonLd: [jsonLd, faq],
     },
   );
@@ -505,16 +571,18 @@ export function sitemapXml() {
     '/blog',
     '/for',
     '/alternatives',
+    ...allFreeGuides().map((g) => `/guides/${g.slug}`),
     ...allGuides().map((g) => `/guides/${g.slug}`),
     ...Object.keys(USE_CASES).map((s) => `/for/${s}`),
     ...Object.keys(ALTS).map((s) => `/alternatives/${s}`),
     ...allPosts().map((p) => `/blog/${p.slug}`),
   ];
+  const postDates = Object.fromEntries(allPosts().map((p) => [`/blog/${p.slug}`, p.date]));
   const body = urls
-    .map(
-      (u) =>
-        `  <url><loc>${SITE}${u}</loc><changefreq>weekly</changefreq></url>`,
-    )
+    .map((u) => {
+      const lastmod = postDates[u] || SITEMAP_LASTMOD;
+      return `  <url><loc>${SITE}${u}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq></url>`;
+    })
     .join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 }
@@ -528,6 +596,9 @@ export function llmsTxt() {
     '# Letter Studio',
     TAGLINE,
     'Custom letter drafts from the customer’s own details. The customer sends the letter. Not legal advice.',
+    '',
+    '## Free',
+    ...allFreeGuides().map((g) => `- ${SITE}/guides/${g.slug} — ${g.title}`),
     '',
     '## Products',
     ...allGuides().map((g) => `- ${SITE}/guides/${g.slug} — ${g.title}`),

@@ -33,6 +33,30 @@ async function listen() {
   };
 }
 
+test('free before-you-send checklist is live, unpaid, and not legal advice', async () => {
+  const { base, close } = await listen();
+  try {
+    const res = await fetch(`${base}/guides/before-you-send`);
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, /checklist/i);
+    assert.match(html, /Member ID/i);
+    assert.match(html, /not legal advice/i);
+    assert.match(html, /No signup/i);
+    assert.doesNotMatch(html, /timeshare/i);
+    assert.match(html, /application\/ld\+json/);
+    const index = await (await fetch(`${base}/guides`)).text();
+    assert.match(index, /before-you-send/);
+    assert.match(index, /Free/);
+    const map = await (await fetch(`${base}/sitemap.xml`)).text();
+    assert.match(map, /\/guides\/before-you-send/);
+    const llms = await (await fetch(`${base}/llms.txt`)).text();
+    assert.match(llms, /before-you-send/);
+  } finally {
+    await close();
+  }
+});
+
 test('guides index lists every SKU and explains customization', async () => {
   const { base, close } = await listen();
   try {
@@ -97,6 +121,30 @@ test('pages carry affiliate footer with disclosure and sponsored rel', async () 
     const gym = await (await fetch(`${base}/guides/gym-cancel`)).text();
     assert.match(gym, /certified\+mail/);
     assert.doesNotMatch(gym, /envelopes\+#/);
+  } finally {
+    await close();
+  }
+});
+
+test('pages expose og image, breadcrumbs, and sitemap lastmod', async () => {
+  const { base, close } = await listen();
+  try {
+    const home = await (await fetch(`${base}/`)).text();
+    assert.match(home, /property="og:image"/);
+    assert.match(home, /letterstudio\.net\/og\.png/);
+    assert.match(home, /twitter:card/);
+    assert.match(home, /og:site_name/);
+    const guide = await (await fetch(`${base}/guides/eulogy`)).text();
+    assert.match(guide, /BreadcrumbList/);
+    assert.match(guide, /\/guides\/eulogy/);
+    const legal = await (await fetch(`${base}/terms`)).text();
+    assert.match(legal, /BreadcrumbList/);
+    const map = await (await fetch(`${base}/sitemap.xml`)).text();
+    assert.match(map, /<lastmod>2026-08-13<\/lastmod>/);
+    assert.match(map, /\/terms/);
+    const og = await fetch(`${base}/og.png`);
+    assert.equal(og.status, 200);
+    assert.match(og.headers.get('content-type') || '', /image\/png/);
   } finally {
     await close();
   }

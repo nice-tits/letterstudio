@@ -15,6 +15,7 @@ import {
   simplePage,
   guidesIndexPage,
   guidePage,
+  freeGuidePage,
   useCasePage,
   altPage,
   destIndexPage,
@@ -25,7 +26,7 @@ import {
   llmsTxt,
   PUBLIC,
 } from './pages.js';
-import { getGuide } from './guides.js';
+import { getGuide, getFreeGuide } from './guides.js';
 import { USE_CASES, ALTS } from './dest.js';
 import { getPost } from './blog.js';
 
@@ -112,6 +113,9 @@ export function createApp({
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
   app.use('/logos', express.static(path.join(PUBLIC, 'logos'), { maxAge: '7d' }));
+  app.get('/og.png', (_req, res) => {
+    res.type('image/png').set('Cache-Control', 'public, max-age=604800').sendFile(path.join(PUBLIC, 'og.png'));
+  });
 
   app.get('/', (_req, res) => {
     res.type('html').send(homePage());
@@ -139,8 +143,10 @@ export function createApp({
 
   app.get('/guides/:slug', (req, res) => {
     const guide = getGuide(req.params.slug);
-    if (!guide) return res.status(404).type('html').send(simplePage('Not found', 'No guide for that letter.'));
-    return res.type('html').send(guidePage(guide));
+    if (guide) return res.type('html').send(guidePage(guide));
+    const free = getFreeGuide(req.params.slug);
+    if (free) return res.type('html').send(freeGuidePage(free));
+    return res.status(404).type('html').send(simplePage('Not found', 'No guide for that letter.'));
   });
 
   app.get('/sitemap.xml', (_req, res) => {

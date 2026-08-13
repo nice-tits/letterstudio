@@ -141,3 +141,108 @@ export function getGuide(slug) {
 export function allGuides() {
   return Object.values(GUIDES);
 }
+
+// Free lead magnet — not a SKU. getGuide stays Brand-A product pages only.
+export const FREE_GUIDES = {
+  'before-you-send': {
+    slug: 'before-you-send',
+    title: 'Don’t send the letter until you have these facts',
+    h1: 'A one-page checklist before you mail, email, or stand up',
+    description:
+      'Free checklist of the facts a cancellation, resignation, eulogy, toast, apology, neighbor note, or complaint actually needs. Not legal advice. You send it.',
+    what: 'Fill the boxes for the letter you are about to send. If a box is empty, stop and find the fact. A polished letter with a blank member ID is a stall.',
+    sections: [
+      {
+        heading: 'Every letter',
+        items: [
+          'Your name as you want it on the page',
+          'Their name, spelled the way they spell it',
+          'Today’s date and the date that matters (last day, cancel-by, the event)',
+          'How you will send it — email, portal, certified mail, hand it over, or speak it. A desk chat is not a record',
+          'A copy you keep',
+        ],
+      },
+      {
+        heading: 'Gym / membership cancel',
+        items: [
+          'Legal name on the account',
+          'Member ID exactly as the card or app shows it. Do not guess',
+          'Club name and the address you are writing to',
+          'The date you want the membership to end',
+          'The method the contract names. We do not tell you to stop paying',
+        ],
+      },
+      {
+        heading: 'Resignation',
+        items: [
+          'Your name and job title as they appear at work',
+          'Manager’s name',
+          'Last day. Two weeks is a custom in a lot of US jobs, not a statute — read your handbook',
+          'Optional thanks only if you mean it. No vent. HR keeps the letter',
+        ],
+      },
+      {
+        heading: 'Eulogy',
+        items: [
+          'The name, spelled as you want it said',
+          'Your relationship in the first sentence so you do not freeze',
+          'Three memories you can see — a kitchen, a joke, a habit. Not a Wikipedia page',
+          'Spoken length: four to seven minutes. Print large type',
+        ],
+      },
+      {
+        heading: 'Wedding or retirement toast',
+        items: [
+          'Your name and how you know them. The back tables cannot hear the MC',
+          'Three stories: before the couple, the couple, a kind close',
+          'A short wish. Sit down. Four minutes',
+        ],
+      },
+      {
+        heading: 'Apology',
+        items: [
+          'What you did, in your words. Not “sorry you felt”',
+          'The impact, if you know it',
+          'One specific repair. “I’ll be better” is not a next step',
+          'No “but.” Everything after “but” is the real letter',
+        ],
+      },
+      {
+        heading: 'Neighbor / HOA note',
+        items: [
+          'Who you are',
+          'One issue, with times if it is noise',
+          'One ask',
+          'A way they can reply. No lawyer threats in the first note',
+        ],
+      },
+      {
+        heading: 'Company complaint',
+        items: [
+          'Your name and the company',
+          'What happened, with dates. Order or account numbers if you have them',
+          'One remedy: refund, replacement, or a written answer',
+          'True events only. Adjectives do not refund',
+        ],
+      },
+      {
+        heading: 'Tone rewrite (the message you almost sent)',
+        items: [
+          'Paste the draft you actually wrote. Do not invent a cleaner story',
+          'Pick one temperature later: firm, warm, or grey-rock',
+          'No lawsuit language',
+        ],
+      },
+    ],
+    not: 'Not legal advice. We do not send the letter. We do not promise anyone honors it. Do not invent facts. We will not write threats, credit-repair pitches, or harassment letters.',
+  },
+};
+
+export function getFreeGuide(slug) {
+  if (typeof slug !== 'string') return null;
+  return FREE_GUIDES[slug.trim().toLowerCase()] ?? null;
+}
+
+export function allFreeGuides() {
+  return Object.values(FREE_GUIDES);
+}
