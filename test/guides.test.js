@@ -86,6 +86,20 @@ test('sitemap, robots, and llms.txt expose the guides', async () => {
   }
 });
 
+test('pages carry affiliate footer with disclosure and sponsored rel', async () => {
+  const { base, close } = await listen();
+  try {
+    const html = await (await fetch(`${base}/`)).text();
+    assert.match(html, /Affiliate links/);
+    assert.match(html, /rel="sponsored nofollow"/);
+    assert.match(html, /tag=openclam-20/);
+    const gym = await (await fetch(`${base}/guides/gym-cancel`)).text();
+    assert.match(gym, /certified\+mail/);
+  } finally {
+    await close();
+  }
+});
+
 test('blog, dest, and alt pages are 200 with schema', async () => {
   const { base, close } = await listen();
   try {

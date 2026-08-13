@@ -4,6 +4,7 @@ import { SKUS } from './skus.js';
 import { GUIDES, SITE, TAGLINE, allGuides } from './guides.js';
 import { USE_CASES, ALTS } from './dest.js';
 import { allPosts } from './blog.js';
+import { amazonSearch, offersFor, footerOffers } from './ads.js';
 
 const PUBLIC = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
@@ -20,6 +21,28 @@ function dollars(cents) {
 }
 
 export { PUBLIC };
+
+function offerLink(offer) {
+  return `<li><a href="${escapeHtml(amazonSearch(offer.q))}" rel="sponsored nofollow" target="_blank" referrerpolicy="origin">${escapeHtml(offer.label)}</a> — ${escapeHtml(offer.blurb)}</li>`;
+}
+
+function adsBlock(sku) {
+  const extra = sku ? offersFor(sku) : [];
+  const footer = footerOffers();
+  const seen = new Set();
+  const list = [];
+  for (const o of [...extra, ...footer]) {
+    if (seen.has(o.id)) continue;
+    seen.add(o.id);
+    list.push(o);
+  }
+  return `<aside class="ads">
+  <h2>Send it yourself</h2>
+  <p>We write the letter. Supplies if you are mailing it:</p>
+  <ul>${list.map(offerLink).join('')}</ul>
+  <p class="fine">Affiliate links. We may earn a commission if you buy. You still send the letter.</p>
+</aside>`;
+}
 
 function layout(title, body, extra = {}) {
   const description =
@@ -58,10 +81,16 @@ function layout(title, body, extra = {}) {
     button { margin-top: 0.9rem; padding: 0.5rem 0.95rem; font: inherit; cursor: pointer; }
     .price { font-weight: 700; }
     nav { margin-top: 1.5rem; font-size: 0.95rem; }
+    .ads { margin: 1.6rem 0 0; padding: 0.9rem 0 0; border-top: 1px solid #d9d0c2; font-size: 0.92rem; }
+    .ads h2 { font-size: 1.05rem; }
+    .ads ul { list-style: none; padding: 0; margin: 0.4rem 0 0; }
+    .ads li { margin: 0.45rem 0; }
+    .ads .fine { margin: 0.55rem 0 0; }
   </style>
 </head>
 <body>
 ${body}
+${adsBlock(extra.sku)}
 </body>
 </html>`;
 }
@@ -247,6 +276,7 @@ export function guidePage(guide) {
       path: `/guides/${guide.slug}`,
       description: guide.description,
       ogType: 'article',
+      sku: guide.slug,
       jsonLd: [jsonLd, faq],
     },
   );
@@ -285,7 +315,7 @@ ${more}
 <p><a href="${escapeHtml(page.cta)}">Write this letter</a></p>
 ${relatedList(page.related)}
 <p class="fine">Not legal advice. You send it yourself.</p>`,
-    { path: `/for/${page.slug}`, description: page.description, jsonLd: faq },
+    { path: `/for/${page.slug}`, description: page.description, sku: page.sku, jsonLd: faq },
   );
 }
 
@@ -383,6 +413,7 @@ export function blogPostPage(post) {
       path: `/blog/${post.slug}`,
       description: post.description,
       ogType: 'article',
+      sku: post.sku,
       jsonLd: [jsonLd, faq],
     },
   );
