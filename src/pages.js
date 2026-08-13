@@ -3,6 +3,7 @@ import path from 'node:path';
 import { SKUS } from './skus.js';
 import { GUIDES, SITE, TAGLINE, allGuides } from './guides.js';
 import { USE_CASES, ALTS } from './dest.js';
+import { allPosts } from './blog.js';
 
 const PUBLIC = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
@@ -154,11 +155,19 @@ export function homePage() {
   <p><img src="/logos/primary-lockup-transparent-250.png" alt="Letter Studio" width="200" height="64"></p>
   <h1>Letter Studio</h1>
   <p><strong>${escapeHtml(TAGLINE)}</strong> Finished letters from the details you type. This is <strong>not legal advice</strong>.</p>
-  <p class="fine"><a href="/guides">Read how each letter is customized</a></p>
+  <p class="fine"><a href="/guides">How each letter is customized</a> · <a href="/blog">Writeups</a> · <a href="/for/gym-members">Who it’s for</a></p>
 </header>
 ${cards}
 <p class="fine">Not legal advice. We draft. You send it yourself.</p>
-<nav><a href="/guides">Guides</a> · <a href="/privacy">Privacy</a></nav>`,
+<nav>
+  <a href="/guides">Guides</a> ·
+  <a href="/blog">Blog</a> ·
+  <a href="/for/gym-members">Gym</a> ·
+  <a href="/for/families">Eulogy</a> ·
+  <a href="/for/quitting">Resign</a> ·
+  <a href="/alternatives/chatgpt">Vs ChatGPT</a> ·
+  <a href="/privacy">Privacy</a>
+</nav>`,
     {
       path: '/',
       description: `${TAGLINE} Custom cancellation letters, eulogies, toasts, apologies, and more from your details.`,
@@ -179,6 +188,7 @@ export function guidesIndexPage() {
     `<h1>How we customize each letter</h1>
 <p>Every order is built from the fields you fill in. We do not paste a stock letter with your name at the top and call it done.</p>
 <ul>${items}</ul>
+<p>Also: <a href="/blog">writeups</a> · <a href="/alternatives/chatgpt">vs ChatGPT</a> · <a href="/for/gym-members">use cases</a></p>
 <nav><a href="/">Order a letter</a> · <a href="/privacy">Privacy</a></nav>`,
     {
       path: '/guides',
@@ -242,28 +252,139 @@ export function guidePage(guide) {
   );
 }
 
+function relatedList(links) {
+  if (!links || !links.length) return '';
+  const items = links.map(([href, label]) => `<li><a href="${escapeHtml(href)}">${escapeHtml(label)}</a></li>`).join('');
+  return `<h2>Related</h2><ul>${items}</ul>`;
+}
+
 export function useCasePage(page) {
+  const more = (page.more || []).map((p) => `<p>${escapeHtml(p)}</p>`).join('');
+  const faq = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'Do you send the letter?',
+        acceptedAnswer: { '@type': 'Answer', text: 'No. We draft. You send it yourself. Not legal advice.' },
+      },
+      {
+        '@type': 'Question',
+        name: page.h1,
+        acceptedAnswer: { '@type': 'Answer', text: page.body },
+      },
+    ],
+  };
   return layout(
     page.title,
-    `<nav class="fine"><a href="/">Home</a></nav>
+    `<nav class="fine"><a href="/">Home</a> · <a href="/blog">Blog</a> · <a href="/guides">Guides</a></nav>
 <h1>${escapeHtml(page.h1)}</h1>
 <p>${escapeHtml(page.body)}</p>
+${more}
 <p><a href="${escapeHtml(page.cta)}">Write this letter</a></p>
+${relatedList(page.related)}
 <p class="fine">Not legal advice. You send it yourself.</p>`,
-    { path: `/for/${page.slug}`, description: page.description },
+    { path: `/for/${page.slug}`, description: page.description, jsonLd: faq },
   );
 }
 
 export function altPage(page) {
   const rows = page.vs.map((row) => `<tr><th>${escapeHtml(row[0])}</th><td>${escapeHtml(row[1])}</td></tr>`).join('');
+  const faq = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: page.vs.slice(0, 3).map((row) => ({
+      '@type': 'Question',
+      name: row[0],
+      acceptedAnswer: { '@type': 'Answer', text: row[1] },
+    })),
+  };
   return layout(
     page.title,
-    `<nav class="fine"><a href="/">Home</a></nav>
+    `<nav class="fine"><a href="/">Home</a> · <a href="/alternatives/chatgpt">More comparisons</a></nav>
 <h1>${escapeHtml(page.h1)}</h1>
 <table>${rows}</table>
 <p>We write it. You send it. Not legal advice.</p>
+${relatedList(page.related)}
 <p><a href="/">See letters</a></p>`,
-    { path: `/alternatives/${page.slug}`, description: page.description },
+    { path: `/alternatives/${page.slug}`, description: page.description, jsonLd: faq },
+  );
+}
+
+export function destIndexPage(kind) {
+  const isFor = kind === 'for';
+  const items = Object.values(isFor ? USE_CASES : ALTS)
+    .map((p) => `<li><a href="/${isFor ? 'for' : 'alternatives'}/${escapeHtml(p.slug)}">${escapeHtml(p.h1)}</a></li>`)
+    .join('');
+  const title = isFor ? 'Who it’s for' : 'Comparisons';
+  const path = isFor ? '/for' : '/alternatives';
+  return layout(
+    title,
+    `<nav class="fine"><a href="/">Home</a></nav>
+<h1>${escapeHtml(title)}</h1>
+<ul>${items}</ul>
+<p class="fine">Not legal advice. We draft. You send it.</p>`,
+    { path, description: isFor ? 'Letter Studio use cases. We write it. You send it.' : 'Letter Studio vs ChatGPT, templates, Grammarly, Fiverr.' },
+  );
+}
+
+export function blogIndexPage() {
+  const items = allPosts()
+    .map((p) => `<li><a href="/blog/${escapeHtml(p.slug)}">${escapeHtml(p.h1)}</a></li>`)
+    .join('');
+  return layout(
+    'Writeups',
+    `<nav class="fine"><a href="/">Home</a> · <a href="/guides">Guides</a></nav>
+<h1>Writeups</h1>
+<p>How to actually write the letter. Then, if you want, we draft it from your fields. Not legal advice.</p>
+<ul>${items}</ul>
+<nav><a href="/">Order a letter</a></nav>`,
+    { path: '/blog', description: 'How to write cancellation letters, eulogies, resignations, apologies. Letter Studio drafts. You send it.' },
+  );
+}
+
+export function blogPostPage(post) {
+  const sections = post.sections
+    .map(([h, body]) => `<h2>${escapeHtml(h)}</h2>\n<p>${escapeHtml(body)}</p>`)
+    .join('\n');
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    dateModified: post.date,
+    author: { '@type': 'Organization', name: 'Letter Studio', url: SITE },
+    publisher: { '@type': 'Organization', name: 'Letter Studio', url: SITE },
+    mainEntityOfPage: `${SITE}/blog/${post.slug}`,
+  };
+  const faq = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: post.sections.slice(0, 2).map(([h, body]) => ({
+      '@type': 'Question',
+      name: h,
+      acceptedAnswer: { '@type': 'Answer', text: body },
+    })),
+  };
+  const order = post.sku ? `<p><a href="/#${escapeHtml(post.sku)}">Order this letter</a> · <a href="/guides/${escapeHtml(post.sku)}">How we customize it</a></p>` : '';
+  return layout(
+    post.title,
+    `<nav class="fine"><a href="/">Home</a> · <a href="/blog">Writeups</a></nav>
+<article>
+  <h1>${escapeHtml(post.h1)}</h1>
+  <p class="fine">${escapeHtml(post.date)}</p>
+  ${sections}
+  ${order}
+</article>
+<nav><a href="/blog">All writeups</a> · <a href="/privacy">Privacy</a></nav>`,
+    {
+      path: `/blog/${post.slug}`,
+      description: post.description,
+      ogType: 'article',
+      jsonLd: [jsonLd, faq],
+    },
   );
 }
 
@@ -272,9 +393,13 @@ export function sitemapXml() {
     '/',
     '/privacy',
     '/guides',
+    '/blog',
+    '/for',
+    '/alternatives',
     ...allGuides().map((g) => `/guides/${g.slug}`),
     ...Object.keys(USE_CASES).map((s) => `/for/${s}`),
     ...Object.keys(ALTS).map((s) => `/alternatives/${s}`),
+    ...allPosts().map((p) => `/blog/${p.slug}`),
   ];
   const body = urls
     .map(
@@ -297,6 +422,15 @@ export function llmsTxt() {
     '',
     '## Products',
     ...allGuides().map((g) => `- ${SITE}/guides/${g.slug} — ${g.title}`),
+    '',
+    '## For',
+    ...Object.values(USE_CASES).map((p) => `- ${SITE}/for/${p.slug} — ${p.title}`),
+    '',
+    '## Alternatives',
+    ...Object.values(ALTS).map((p) => `- ${SITE}/alternatives/${p.slug} — ${p.title}`),
+    '',
+    '## Writeups',
+    ...allPosts().map((p) => `- ${SITE}/blog/${p.slug} — ${p.title}`),
   ];
   return lines.join('\n') + '\n';
 }

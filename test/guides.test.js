@@ -72,11 +72,43 @@ test('sitemap, robots, and llms.txt expose the guides', async () => {
   try {
     const map = await (await fetch(`${base}/sitemap.xml`)).text();
     assert.match(map, /https:\/\/letterstudio\.net\/guides\/eulogy/);
+    assert.match(map, /\/blog\/cancel-gym-membership-letter/);
+    assert.match(map, /\/for\/quitting/);
+    assert.match(map, /\/alternatives\/templates/);
     const robots = await (await fetch(`${base}/robots.txt`)).text();
     assert.match(robots, /sitemap.xml/i);
     const llms = await (await fetch(`${base}/llms.txt`)).text();
     assert.match(llms, /Letter Studio/);
     assert.match(llms, /Not legal advice/);
+    assert.match(llms, /\/blog\//);
+  } finally {
+    await close();
+  }
+});
+
+test('blog, dest, and alt pages are 200 with schema', async () => {
+  const { base, close } = await listen();
+  try {
+    for (const path of [
+      '/blog',
+      '/blog/cancel-gym-membership-letter',
+      '/blog/chatgpt-vs-letter-studio',
+      '/for',
+      '/for/quitting',
+      '/for/neighbors',
+      '/alternatives',
+      '/alternatives/templates',
+      '/alternatives/grammarly',
+    ]) {
+      const res = await fetch(`${base}${path}`);
+      assert.equal(res.status, 200, path);
+      const html = await res.text();
+      assert.match(html, /not legal advice/i);
+    }
+    const post = await (await fetch(`${base}/blog/eulogy-from-your-notes`)).text();
+    assert.match(post, /application\/ld\+json/);
+    const missing = await fetch(`${base}/blog/timeshare-scam`);
+    assert.equal(missing.status, 404);
   } finally {
     await close();
   }

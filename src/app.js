@@ -14,6 +14,9 @@ import {
   guidePage,
   useCasePage,
   altPage,
+  destIndexPage,
+  blogIndexPage,
+  blogPostPage,
   sitemapXml,
   robotsTxt,
   llmsTxt,
@@ -21,6 +24,7 @@ import {
 } from './pages.js';
 import { getGuide } from './guides.js';
 import { USE_CASES, ALTS } from './dest.js';
+import { getPost } from './blog.js';
 
 export const INDEXNOW_KEY = '7c4e9b2a18d04f6e91c35a80b47d2f1e';
 
@@ -138,6 +142,24 @@ export function createApp({
 
   app.get('/llms.txt', (_req, res) => {
     res.type('text/plain').send(llmsTxt());
+  });
+
+  app.get('/blog', (_req, res) => {
+    res.type('html').send(blogIndexPage());
+  });
+
+  app.get('/blog/:slug', (req, res) => {
+    const post = getPost(req.params.slug);
+    if (!post) return res.status(404).type('html').send(simplePage('Not found', 'No writeup there.'));
+    return res.type('html').send(blogPostPage(post));
+  });
+
+  app.get('/for', (_req, res) => {
+    res.type('html').send(destIndexPage('for'));
+  });
+
+  app.get('/alternatives', (_req, res) => {
+    res.type('html').send(destIndexPage('alternatives'));
   });
 
   app.get('/for/:slug', (req, res) => {
