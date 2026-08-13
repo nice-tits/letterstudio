@@ -22,6 +22,8 @@ import {
 import { getGuide } from './guides.js';
 import { USE_CASES, ALTS } from './dest.js';
 
+export const INDEXNOW_KEY = '7c4e9b2a18d04f6e91c35a80b47d2f1e';
+
 function defaultStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_not_configured');
 }
@@ -128,6 +130,10 @@ export function createApp({
 
   app.get('/robots.txt', (_req, res) => {
     res.type('text/plain').send(robotsTxt());
+  });
+
+  app.get('/' + INDEXNOW_KEY + '.txt', (_req, res) => {
+    res.type('text/plain').send(INDEXNOW_KEY);
   });
 
   app.get('/llms.txt', (_req, res) => {
