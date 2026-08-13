@@ -11,4 +11,14 @@ date,directory,url,tier,status,listing_url,notes
 2026-08-13,TAAFT,https://theresanaiforthat.com/submit/,3,blocked,,login + $49
 2026-08-13,SaaSHub,https://www.saashub.com/submit,2,blocked,,needs account
 2026-08-13,IndexNow,https://api.indexnow.org/indexnow,index,live,https://letterstudio.net/7c4e9b2a18d04f6e91c35a80b47d2f1e.txt,202 accepted
+2026-08-13,GitHub gist gym five facts,https://gist.github.com/nice-tits/de899862f9ba704f6e428c7df2e740e1,8,live,https://gist.github.com/nice-tits/de899862f9ba704f6e428c7df2e740e1,public dofollow gist
+2026-08-13,GitHub gist resignation,https://gist.github.com/nice-tits/8bfd16fffd9d9a134898b47833232cdf,8,live,https://gist.github.com/nice-tits/8bfd16fffd9d9a134898b47833232cdf,public dofollow gist
+2026-08-13,GitHub gist fields,https://gist.github.com/nice-tits/b57bde9ca611850aa2c42b71a6f7e424,8,live,https://gist.github.com/nice-tits/b57bde9ca611850aa2c42b71a6f7e424,public dofollow gist
+2026-08-13,GitHub topics,https://github.com/nice-tits/letterstudio,8,live,https://github.com/nice-tits/letterstudio,added letter-writing copywriting resignation-letter apology-letter speech-writing
+2026-08-13,awesome-writing-tools,https://github.com/yowainwright/awesome-writing-tools/pull/50,8,pr,https://github.com/yowainwright/awesome-writing-tools/pull/50,same-day open; no nudge
+2026-08-13,Codeberg,https://codeberg.org/nice-tits,8,blocked,,no auth; user 404
+2026-08-13,GitLab,https://gitlab.com/nice-tits,8,blocked,https://gitlab.com/nice-tits,account exists; no token; 0 projects
+2026-08-13,Dev.to,https://dev.to,8,blocked,,not logged in
+2026-08-13,Hashnode,https://hashnode.com/@nice-tits,8,blocked,,not logged in; user not found
+2026-08-13,IndexNow,https://api.indexnow.org/indexnow,index,live,https://letterstudio.net/sitemap.xml,200; 38 sitemap + og.png
 
