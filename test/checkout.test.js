@@ -107,8 +107,15 @@ test('privacy page exists and says Stripe handles cards', async () => {
     const res = await fetch(`${base}/privacy`);
     assert.equal(res.status, 200);
     const html = await res.text();
-    assert.match(html, /letter-writing/i);
-    assert.match(html, /Stripe handles cards/i);
+    assert.match(html, /Stripe collects card numbers/i);
+    assert.match(html, /not legal advice/i);
+    const terms = await (await fetch(`${base}/terms`)).text();
+    assert.match(terms, /not legal advice/i);
+    assert.match(terms, /do not mail/i);
+    const disc = await (await fetch(`${base}/disclosure`)).text();
+    assert.match(disc, /As an Amazon Associate I earn from qualifying purchases/);
+    const refunds = await (await fetch(`${base}/refunds`)).text();
+    assert.match(refunds, /inbox/i);
   } finally {
     await close();
     fs.rmSync(dataDir, { recursive: true, force: true });

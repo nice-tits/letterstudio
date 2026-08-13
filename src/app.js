@@ -9,6 +9,9 @@ import { llm } from './llm.js';
 import {
   homePage,
   privacyPage,
+  termsPage,
+  disclosurePage,
+  refundsPage,
   simplePage,
   guidesIndexPage,
   guidePage,
@@ -116,6 +119,18 @@ export function createApp({
 
   app.get('/privacy', (_req, res) => {
     res.type('html').send(privacyPage());
+  });
+
+  app.get('/terms', (_req, res) => {
+    res.type('html').send(termsPage());
+  });
+
+  app.get('/disclosure', (_req, res) => {
+    res.type('html').send(disclosurePage());
+  });
+
+  app.get('/refunds', (_req, res) => {
+    res.type('html').send(refundsPage());
   });
 
   app.get('/guides', (_req, res) => {

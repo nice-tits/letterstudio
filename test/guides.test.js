@@ -90,9 +90,10 @@ test('pages carry affiliate footer with disclosure and sponsored rel', async () 
   const { base, close } = await listen();
   try {
     const html = await (await fetch(`${base}/`)).text();
-    assert.match(html, /Affiliate links/);
+    assert.match(html, /As an Amazon Associate I earn from qualifying purchases/);
     assert.match(html, /rel="sponsored nofollow"/);
     assert.match(html, /tag=openclam-20/);
+    assert.match(html, /\/disclosure/);
     const gym = await (await fetch(`${base}/guides/gym-cancel`)).text();
     assert.match(gym, /certified\+mail/);
   } finally {

@@ -5,6 +5,7 @@ import { GUIDES, SITE, TAGLINE, allGuides } from './guides.js';
 import { USE_CASES, ALTS } from './dest.js';
 import { allPosts } from './blog.js';
 import { amazonSearch, offersFor, footerOffers } from './ads.js';
+import { LEGAL, CONTACT_EMAIL } from './legal.js';
 
 const PUBLIC = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
@@ -40,7 +41,7 @@ function adsBlock(sku) {
   <h2>Send it yourself</h2>
   <p>We write the letter. Supplies if you are mailing it:</p>
   <ul>${list.map(offerLink).join('')}</ul>
-  <p class="fine">Affiliate links. We may earn a commission if you buy. You still send the letter.</p>
+  <p class="fine">As an Amazon Associate I earn from qualifying purchases. <a href="/disclosure">Affiliate disclosure</a>.</p>
 </aside>`;
 }
 
@@ -104,16 +105,35 @@ export function simplePage(title, message) {
   );
 }
 
-export function privacyPage() {
+function legalPage(key) {
+  const doc = LEGAL[key];
+  const sections = doc.sections
+    .map(([h, body]) => `<h2>${escapeHtml(h)}</h2>\n<p>${escapeHtml(body)}</p>`)
+    .join('\n');
   return layout(
-    'Privacy',
-    `<h1>Privacy</h1>
-<p>Lettermill is a letter-writing service. You fill in the details, we draft the letter, and you send it yourself.</p>
-<p>Stripe handles cards. We never see or store your full card number. Optional last-four digits on the gym form are only for the letter text if you choose to include them.</p>
-<p>Pending drafts are stored only until you pay, cancel, or they expire. Payment events are recorded so we do not email the same letter twice.</p>
-<p>This is not legal advice.</p>
-<nav><a href="/">Home</a></nav>`,
+    doc.title,
+    `<nav class="fine"><a href="/">Home</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/refunds">Refunds</a> · <a href="/disclosure">Affiliates</a></nav>
+<h1>${escapeHtml(doc.h1)}</h1>
+${sections}
+<p class="fine"><a href="mailto:${escapeHtml(CONTACT_EMAIL)}">${escapeHtml(CONTACT_EMAIL)}</a>. Not legal advice.</p>`,
+    { path: `/${key === 'disclosure' ? 'disclosure' : key}` },
   );
+}
+
+export function privacyPage() {
+  return legalPage('privacy');
+}
+
+export function termsPage() {
+  return legalPage('terms');
+}
+
+export function disclosurePage() {
+  return legalPage('disclosure');
+}
+
+export function refundsPage() {
+  return legalPage('refunds');
 }
 
 function fieldHtml(sku, field) {
@@ -195,7 +215,9 @@ ${cards}
   <a href="/for/families">Eulogy</a> ·
   <a href="/for/quitting">Resign</a> ·
   <a href="/alternatives/chatgpt">Vs ChatGPT</a> ·
-  <a href="/privacy">Privacy</a>
+  <a href="/privacy">Privacy</a> ·
+  <a href="/terms">Terms</a> ·
+  <a href="/disclosure">Affiliates</a>
 </nav>`,
     {
       path: '/',
@@ -423,6 +445,9 @@ export function sitemapXml() {
   const urls = [
     '/',
     '/privacy',
+    '/terms',
+    '/refunds',
+    '/disclosure',
     '/guides',
     '/blog',
     '/for',
