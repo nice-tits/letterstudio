@@ -96,6 +96,7 @@ test('pages carry affiliate footer with disclosure and sponsored rel', async () 
     assert.match(html, /\/disclosure/);
     const gym = await (await fetch(`${base}/guides/gym-cancel`)).text();
     assert.match(gym, /certified\+mail/);
+    assert.doesNotMatch(gym, /envelopes\+#/);
   } finally {
     await close();
   }

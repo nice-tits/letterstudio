@@ -39,10 +39,49 @@ function adsBlock(sku) {
   }
   return `<aside class="ads">
   <h2>Send it yourself</h2>
+  <p><strong>As an Amazon Associate I earn from qualifying purchases.</strong> Paid links (#ad). <a href="/disclosure">Full disclosure</a>.</p>
   <p>We write the letter. Supplies if you are mailing it:</p>
   <ul>${list.map(offerLink).join('')}</ul>
-  <p class="fine">As an Amazon Associate I earn from qualifying purchases. <a href="/disclosure">Affiliate disclosure</a>.</p>
 </aside>`;
+}
+
+const OG_IMAGE = `${SITE}/og.png`;
+const OG_IMAGE_ALT = 'Letter Studio — We write it. You send it.';
+const SITEMAP_LASTMOD = '2026-08-13';
+
+const SECTION_CRUMB = {
+  guides: ['Guides', '/guides'],
+  blog: ['Writeups', '/blog'],
+  for: ['Who it’s for', '/for'],
+  alternatives: ['Comparisons', '/alternatives'],
+  privacy: ['Privacy', '/privacy'],
+  terms: ['Terms', '/terms'],
+  refunds: ['Refunds', '/refunds'],
+  disclosure: ['Affiliates', '/disclosure'],
+};
+
+function breadcrumbJsonLd(pagePath, leafName) {
+  if (!pagePath || pagePath === '/') return null;
+  const segs = pagePath.replace(/^\//, '').split('/').filter(Boolean);
+  const items = [{ name: 'Home', item: `${SITE}/` }];
+  const first = segs[0];
+  if (SECTION_CRUMB[first]) {
+    const [name, href] = SECTION_CRUMB[first];
+    items.push({ name, item: `${SITE}${href}` });
+  }
+  if (segs[1]) {
+    items.push({ name: leafName || segs[1], item: `${SITE}${pagePath}` });
+  }
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((it, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: it.name,
+      item: it.item,
+    })),
+  };
 }
 
 function layout(title, body, extra = {}) {
@@ -52,9 +91,12 @@ function layout(title, body, extra = {}) {
   const pagePath = extra.path || '/';
   const canonical = `${SITE}${pagePath}`;
   const blobs = extra.jsonLd == null ? [] : Array.isArray(extra.jsonLd) ? extra.jsonLd : [extra.jsonLd];
+  const crumbs = breadcrumbJsonLd(pagePath, extra.crumb);
+  if (crumbs) blobs.push(crumbs);
   const jsonLd = blobs
     .map((b) => `<script type="application/ld+json">${JSON.stringify(b)}</script>`)
     .join('\n  ');
+  const ogImage = extra.ogImage || OG_IMAGE;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -67,6 +109,17 @@ function layout(title, body, extra = {}) {
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:url" content="${escapeHtml(canonical)}">
   <meta property="og:type" content="${extra.ogType || 'website'}">
+  <meta property="og:site_name" content="Letter Studio">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="${escapeHtml(ogImage)}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="${escapeHtml(OG_IMAGE_ALT)}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escapeHtml(title)}">
+  <meta name="twitter:description" content="${escapeHtml(description)}">
+  <meta name="twitter:image" content="${escapeHtml(ogImage)}">
+  <meta name="twitter:image:alt" content="${escapeHtml(OG_IMAGE_ALT)}">
   ${jsonLd}
   <style>
     :root { color: #1b1916; background: #f6f1e8; font-family: Georgia, "Times New Roman", serif; }
@@ -116,7 +169,7 @@ function legalPage(key) {
 <h1>${escapeHtml(doc.h1)}</h1>
 ${sections}
 <p class="fine"><a href="mailto:${escapeHtml(CONTACT_EMAIL)}">${escapeHtml(CONTACT_EMAIL)}</a>. Not legal advice.</p>`,
-    { path: `/${key === 'disclosure' ? 'disclosure' : key}` },
+    { path: `/${key === 'disclosure' ? 'disclosure' : key}`, crumb: doc.h1 },
   );
 }
 

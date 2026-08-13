@@ -12,7 +12,7 @@ const OFFERS = {
     id: 'envelopes',
     label: 'Business envelopes',
     blurb: 'Print it. Fold it. Mail it.',
-    q: 'business+envelopes+#10',
+    q: 'number+10+business+envelopes',
   },
   stamps: {
     id: 'stamps',
